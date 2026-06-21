@@ -269,6 +269,10 @@ class GameState:
         self.frame_count:   int = 0
         self.spawn_counter: int = 0
 
+        # 圖鑑統計：本場每種怪物「出現」與「擊敗」次數（含已離開畫面的）
+        self.spawn_counts: dict = {mt: 0 for mt in MonsterType}
+        self.kill_counts:  dict = {mt: 0 for mt in MonsterType}
+
         self.message:       str = ""
         self.message_timer: int = 0
 
@@ -327,6 +331,7 @@ class GameState:
             speed=speed, mtype=mtype,
             size=random.randint(30, 44),
         ))
+        self.spawn_counts[mtype] = self.spawn_counts.get(mtype, 0) + 1
 
     # ── 發射雷射 ─────────────────────────────────────────────────────────────
 
@@ -361,6 +366,7 @@ class GameState:
             target.flash  = 6
             if target.hp <= 0:
                 target.alive = False
+                self.kill_counts[target.mtype] = self.kill_counts.get(target.mtype, 0) + 1
                 self.explosions.append(Explosion(target.x, target.y))
                 pts = self.SCORE_PER_KILL * self.level
                 self.score += pts
@@ -483,41 +489,13 @@ class GameState:
             put_text_centered(frame, self.message, w // 2, ty,
                               size=46, color=(255, 220, 50), shadow=True)
 
-        # Game Over 遮罩
+        # Game Over 遮罩（場景流程會在停留後進入「結算」，故只顯示結果，不放舊按鍵）
         if self.game_over:
             overlay2 = frame.copy()
             cv2.rectangle(overlay2, (0, 0), (w, h), (0, 0, 0), -1)
             cv2.addWeighted(overlay2, 0.72, frame, 0.28, 0, frame)
 
-            for text, sz, color, ty in [
-                ("GAME OVER",                    64, (50,  50, 255),   h // 2 - 130),
-                (f"最終分數: {self.score}",        40, (255, 255, 255), h // 2 -  40),
-                ("按 R 重新開始，按 H 返回首頁，按 Q 離開", 24, (210, 210, 210), h // 2 +  32),
-            ]:
-                put_text_centered(frame, text, w // 2, ty,
-                                  size=sz, color=color, shadow=True)
-
-            # 按鈕樣式提示
-            btn_w, btn_h = 220, 60
-            btn_gap = 24
-            center_x = w // 2
-            left_x = center_x - btn_w - btn_gap // 2
-            right_x = center_x + btn_gap // 2
-            btn_y = h // 2 + 70
-
-            cv2.rectangle(frame, (left_x, btn_y), (left_x + btn_w, btn_y + btn_h), (30, 40, 80), -1)
-            cv2.rectangle(frame, (left_x, btn_y), (left_x + btn_w, btn_y + btn_h), (170, 200, 255), 2)
-            put_text_centered(frame, "R 重新開始", left_x + btn_w // 2, btn_y + btn_h // 2 - 8,
-                              size=24, color=(180, 230, 255), bold=True)
-
-            cv2.rectangle(frame, (right_x, btn_y), (right_x + btn_w, btn_y + btn_h), (50, 40, 40), -1)
-            cv2.rectangle(frame, (right_x, btn_y), (right_x + btn_w, btn_y + btn_h), (255, 180, 130), 2)
-            put_text_centered(frame, "H 返回首頁", right_x + btn_w // 2, btn_y + btn_h // 2 - 8,
-                              size=24, color=(255, 210, 170), bold=True)
-            
-            exit_x = center_x - btn_w // 2
-            exit_y = btn_y + btn_h + 16
-            cv2.rectangle(frame, (exit_x, exit_y), (exit_x + btn_w, exit_y + btn_h), (60, 40, 40), -1)
-            cv2.rectangle(frame, (exit_x, exit_y), (exit_x + btn_w, exit_y + btn_h), (220, 120, 120), 2)
-            put_text_centered(frame, "Q 退出遊戲", exit_x + btn_w // 2, exit_y + btn_h // 2 - 8,
-                              size=24, color=(255, 200, 200), bold=True)
+            put_text_centered(frame, "GAME OVER", w // 2, h // 2 - 110,
+                              size=64, color=(50, 50, 255), shadow=True)
+            put_text_centered(frame, f"最終分數: {self.score}", w // 2, h // 2 - 20,
+                              size=40, color=(255, 255, 255), shadow=True)

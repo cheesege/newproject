@@ -18,12 +18,15 @@ from mediapipe.tasks.python import BaseOptions
 
 # ── 模型下載 ──────────────────────────────────────────────────────────────────
 
-_MODEL_FILENAME = "pose_landmarker_full.task"
+# 採用 lite 模型：CPU 推論明顯比 full 快，對深蹲／伏地挺身的角度判定已足夠，
+# 大幅提升遊戲 FPS（full 模型的推論本身就是 FPS 瓶頸，且其內部會把輸入縮到固定大小，
+# 故只縮小輸入畫面助益有限，換較輕的模型才是關鍵）。
+_MODEL_FILENAME = "pose_landmarker_lite.task"
 _MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), _MODEL_FILENAME)
 _MODEL_URL = (
     "https://storage.googleapis.com/mediapipe-models/"
-    "pose_landmarker/pose_landmarker_full/float16/latest/"
-    "pose_landmarker_full.task"
+    "pose_landmarker/pose_landmarker_lite/float16/latest/"
+    "pose_landmarker_lite.task"
 )
 
 
@@ -68,6 +71,10 @@ class PoseDetector:
       Landmark                  → PoseLandmark enum（同舊版）
     """
 
+    # 姿態偵測用的輸入寬度上限。畫面以原解析度顯示，但送進 MediaPipe 前先縮小，
+    # 大幅降低 CPU 負擔、提升 FPS；landmark 為正規化座標(0~1)，縮放不影響對應。
+    DETECT_WIDTH = 640
+
     def __init__(
         self,
         min_detection_confidence: float = 0.6,
@@ -96,7 +103,15 @@ class PoseDetector:
 
     def process(self, frame: np.ndarray) -> object:
         """處理一幀 BGR 影像，內部更新骨架狀態。"""
-        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # 偵測前先縮小到 DETECT_WIDTH（保持長寬比），加速 MediaPipe 推論。
+        h, w = frame.shape[:2]
+        if w > self.DETECT_WIDTH:
+            scale = self.DETECT_WIDTH / w
+            small = cv2.resize(frame, (self.DETECT_WIDTH, int(h * scale)),
+                               interpolation=cv2.INTER_AREA)
+        else:
+            small = frame
+        rgb = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
         mp_img = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
 
         # VIDEO mode 要求時間戳嚴格遞增（單位：毫秒）

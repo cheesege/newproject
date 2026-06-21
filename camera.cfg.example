@@ -1,0 +1,16 @@
+# 攝影機來源設定範例
+# 複製此檔為 camera.cfg 並改成你的來源。第一行非註解內容即為來源。
+#
+# 本機鏡頭（預設）：
+# 0
+#
+# Android「IP Webcam」App（MJPEG）：
+# http://192.168.0.10:8080/video
+#
+# DroidCam：
+# http://192.168.0.10:4747/video
+#
+# RTSP 串流：
+# rtsp://192.168.0.10:8554/live
+
+0

@@ -126,6 +126,14 @@ def put_text(
 
     # 貼到 frame
     x, y = int(xy[0]) - pad, int(xy[1]) - pad
+
+    # 自適應：若文字會超出畫面邊界，平移回框內（避免被切掉）
+    fh, fw = frame.shape[:2]
+    if tile_w <= fw:
+        x = max(0, min(x, fw - tile_w))
+    if tile_h <= fh:
+        y = max(0, min(y, fh - tile_h))
+
     _paste_rgba(frame, tile, x, y)
 
     return frame

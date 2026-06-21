@@ -219,3 +219,11 @@ __marimo__/
 
 
 .claude
+# 體感健身房執行時產生的檔案
+gym.db
+trend.png
+camera.cfg
+fitness_battle_*.png
+
+# 姿態模型（首次執行自動下載）
+*.task
