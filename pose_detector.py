@@ -18,15 +18,15 @@ from mediapipe.tasks.python import BaseOptions
 
 # ── 模型下載 ──────────────────────────────────────────────────────────────────
 
-# 採用 lite 模型：CPU 推論明顯比 full 快，對深蹲／伏地挺身的角度判定已足夠，
-# 大幅提升遊戲 FPS（full 模型的推論本身就是 FPS 瓶頸，且其內部會把輸入縮到固定大小，
-# 故只縮小輸入畫面助益有限，換較輕的模型才是關鍵）。
-_MODEL_FILENAME = "pose_landmarker_lite.task"
+# 採用 full 模型：骨架較穩、計數較準。FPS 主要靠「相機背景執行緒抓幀」與
+# 「每隔一幀才偵測一次」維持（見 camera_source.py 與 scenes/playing.py），
+# 故即使用 full 也不會回到原本的卡頓。
+_MODEL_FILENAME = "pose_landmarker_full.task"
 _MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), _MODEL_FILENAME)
 _MODEL_URL = (
     "https://storage.googleapis.com/mediapipe-models/"
-    "pose_landmarker/pose_landmarker_lite/float16/latest/"
-    "pose_landmarker_lite.task"
+    "pose_landmarker/pose_landmarker_full/float16/latest/"
+    "pose_landmarker_full.task"
 )
 
 

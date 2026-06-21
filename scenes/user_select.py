@@ -26,6 +26,9 @@ class UserSelectScene(Scene):
         if key == ord('n'):
             self._create_user()
             return
+        if key == ord('c'):
+            self.go(SceneName.CAMERA, back=SceneName.USER_SELECT)
+            return
         # 數字鍵選擇使用者（1 起算）
         if ord('1') <= key <= ord('9'):
             idx = key - ord('1')
@@ -79,5 +82,5 @@ class UserSelectScene(Scene):
                     info += f"   BMI {bmi:.1f}"
                 put_text(frame, info, (w // 2 + 80, y + 16), size=24, color=(200, 215, 235))
 
-        put_text_centered(frame, "數字鍵選擇使用者 ｜ N 創建新使用者 ｜ Q 離開",
+        put_text_centered(frame, "數字鍵選擇使用者 ｜ N 創建新使用者 ｜ C 攝影機設定 ｜ Q 離開",
                           w // 2, h - 40, size=24, color=(190, 210, 240))

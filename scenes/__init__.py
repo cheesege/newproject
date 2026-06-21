@@ -14,6 +14,7 @@ from scenes.paused import PausedScene
 from scenes.result import ResultScene
 from scenes.trends import TrendsScene
 from scenes.twin import TwinScene
+from scenes.camera_settings import CameraScene
 
 
 def build_scenes(app):
@@ -26,6 +27,7 @@ def build_scenes(app):
         SceneName.RESULT: ResultScene(app),
         SceneName.TRENDS: TrendsScene(app),
         SceneName.TWIN: TwinScene(app),
+        SceneName.CAMERA: CameraScene(app),
     }
 
 

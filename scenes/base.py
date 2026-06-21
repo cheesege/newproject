@@ -54,6 +54,7 @@ class SceneName:
     RESULT = "RESULT"
     TRENDS = "TRENDS"
     TWIN = "TWIN"
+    CAMERA = "CAMERA"
 
 
 QUIT = "__quit__"     # 特殊目標：結束程式

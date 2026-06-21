@@ -75,12 +75,30 @@ class GameApp:
 
     # ── 影像 ──
     def read_frame(self):
-        """取得一張鏡像後的攝影機畫面；無攝影機則回傳深色空白畫面。"""
-        if self.camera.opened:
+        """取得一張鏡像後的攝影機畫面；無攝影機則回傳深色空白畫面。
+
+        不論來源解析度為何，都統一縮放成 (W, H)，讓版面與遊戲邏輯一致——
+        這也讓「執行中切換到不同解析度的手機串流」不會破壞畫面。
+        """
+        if self.camera is not None and self.camera.opened:
             ret, frame = self.camera.read()
             if ret:
+                if frame.shape[1] != self.W or frame.shape[0] != self.H:
+                    frame = cv2.resize(frame, (self.W, self.H))
                 return cv2.flip(frame, 1)
         return np.full((self.H, self.W, 3), (16, 20, 32), dtype=np.uint8)
+
+    def set_camera(self, new_cam) -> bool:
+        """執行中切換攝影機來源。new_cam 需已成功 open。回傳是否切換成功。"""
+        if new_cam is None or not new_cam.opened:
+            return False
+        old = self.camera
+        self.camera = new_cam
+        self.value_reader._cap = new_cam      # 讓輸入畫面背景也用新來源
+        self.source = getattr(new_cam, "desc", "?")
+        if old is not None and old is not new_cam:
+            old.release()
+        return True
 
     # ── 場景切換 ──
     def switch(self, name, **kwargs):

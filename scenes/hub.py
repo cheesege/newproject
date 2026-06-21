@@ -26,6 +26,8 @@ class HubScene(Scene):
             self._update_body()
         elif key == ord('u'):
             self.go(SceneName.USER_SELECT)
+        elif key == ord('c'):
+            self.go(SceneName.CAMERA, back=SceneName.HUB)
         elif key in (ord('q'), 27):
             self.quit()
 
@@ -91,5 +93,5 @@ class HubScene(Scene):
         # 選單
         put_text_centered(frame, "G 開始訓練 ｜ T 趨勢 ｜ D 數位分身 ｜ B 更新身體數據",
                           w // 2, h - 64, size=24, color=(190, 210, 240))
-        put_text_centered(frame, "U 切換使用者 ｜ Q 離開",
+        put_text_centered(frame, "U 切換使用者 ｜ C 攝影機設定 ｜ Q 離開",
                           w // 2, h - 30, size=22, color=(180, 200, 230))
